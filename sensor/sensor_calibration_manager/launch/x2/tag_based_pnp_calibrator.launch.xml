@@ -13,14 +13,15 @@
   <arg name="view_only_ui" default="true" description="By default we use a minimal UI"/>
   <arg name="calibration_pairs" default="9" description="Number of lidar-image pairs for the calibration to converge"/>
   <arg name="calibration_pairs_min_distance" default="1.5" description="Minimum allowed between a new detection and current pairs"/>
+  <arg name="rviz" default="true" description="Launch rviz"/>
 
   <!-- we do not use the standard image_raw name to avoid naming conflicts -->
-  <let name="image_decompressed_topic" value="/sensing/camera/$(var camera_name)/image_rect_color/decompressed"/>
-  <let name="image_compressed_topic" value="/sensing/camera/$(var camera_name)/image_rect_color/compressed"/>
+  <let name="image_decompressed_topic" value="/sensing/camera/$(var camera_name)/calib/decompressed"/>
+  <let name="image_compressed_topic" value="/sensing/camera/$(var camera_name)/calib/compressed"/>
   <let name="image_decompressed_topic" value="/sensing/camera/$(var camera_name)/image_raw/decompressed" if="$(eval &quot;'$(var camera_name)' == 'camera7' &quot;)"/>
   <let name="image_compressed_topic" value="/sensing/camera/$(var camera_name)/image_raw/compressed" if="$(eval &quot;'$(var camera_name)' == 'camera7' &quot;)"/>
 
-  <let name="camera_info_topic" value="/sensing/camera/$(var camera_name)/camera_info"/>
+  <let name="camera_info_topic" value="/sensing/camera/$(var camera_name)/calib/camera_info"/>
   <let name="pointcloud_topic" value="/sensing/lidar/left_upper/pointcloud_raw" if="$(eval &quot;'$(var camera_name)' == 'camera0' &quot;)"/>
   <let name="pointcloud_topic" value="/sensing/lidar/right_upper/pointcloud_raw" if="$(eval &quot;'$(var camera_name)' == 'camera1' &quot;)"/>
   <let name="pointcloud_topic" value="/sensing/lidar/right_upper/pointcloud_raw" if="$(eval &quot;'$(var camera_name)' == 'camera2' &quot;)"/>
@@ -85,7 +86,6 @@
       <remap from="camera_info" to="$(var camera_info_topic)"/>
       <remap from="calibration_points_input" to="calibration_points"/>
     </node>
-
     <!-- create a placeholder lidar frame to make the rviz profile generic -->
     <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_broadcaster" output="screen" args="0 0 0 0 0 0 $(var lidar_frame) lidar_frame"/>
 
