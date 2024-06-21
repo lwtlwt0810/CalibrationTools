@@ -90,7 +90,7 @@
     <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_broadcaster" output="screen" args="0 0 0 0 0 0 $(var lidar_frame) lidar_frame"/>
 
     <!-- remap the pointcloud topic to make the rviz profile generic -->
-    <node pkg="rviz2" exec="rviz2" name="rviz2" output="screen" args="-d $(var rviz_profile)">
+    <node pkg="rviz2" exec="rviz2" name="rviz2" output="screen" args="-d $(var rviz_profile)" if="$(var rviz)">
       <remap from="pointcloud_topic_placeholder" to="$(var pointcloud_topic)"/>
     </node>
   </group>
