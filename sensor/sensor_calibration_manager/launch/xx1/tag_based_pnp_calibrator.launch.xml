@@ -61,7 +61,7 @@
     </node>
 
     <!-- camera view -->
-    <node pkg="tier4_calibration_views" exec="image_view_node.py" name="image_view_node_py" output="screen" if="$(eval &quot;'$(var view_only_ui)' == 'true' &quot;)">
+    <node pkg="tier4_calibration_views" exec="image_view_node.py" name="image_view_node_py" output="screen" if="$(eval &quot;'$(var view_only_ui)' == 'false' &quot;)">
       <remap from="pointcloud" to="$(var pointcloud_topic)"/>
       <remap from="image" to="$(var image_compressed_topic)"/>
       <remap from="camera_info" to="$(var camera_info_topic)"/>
