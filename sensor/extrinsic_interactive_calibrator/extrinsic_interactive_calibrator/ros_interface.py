@@ -64,7 +64,7 @@ class RosInterface(Node):
         self.declare_parameter("camera_frame", rclpy.Parameter.Type.STRING)
         self.declare_parameter("use_compressed", True)
         self.declare_parameter("timer_period", 1.0)
-        self.declare_parameter("delay_tolerance", 0.5)
+        self.declare_parameter("delay_tolerance", 2.5)
         self.declare_parameter("use_calibration_api", True)
         self.declare_parameter("can_publish_tf", True)
 
@@ -255,11 +255,11 @@ class RosInterface(Node):
 
     def set_camera_lidar_transform(self, camera_optical_lidar_transform):
         with self.lock:
-            optical_axis_to_camera_transform = np.zeros((4, 4))
-            optical_axis_to_camera_transform[0, 1] = -1
-            optical_axis_to_camera_transform[1, 2] = -1
-            optical_axis_to_camera_transform[2, 0] = 1
-            optical_axis_to_camera_transform[3, 3] = 1
+            # optical_axis_to_camera_transform = np.zeros((4, 4))
+            # optical_axis_to_camera_transform[0, 1] = -1
+            # optical_axis_to_camera_transform[1, 2] = -1
+            # optical_axis_to_camera_transform[2, 0] = 1
+            # optical_axis_to_camera_transform[3, 3] = 1
 
             try:
                 camera_parent_lidar_tf = self.tf_buffer.lookup_transform(
@@ -277,11 +277,17 @@ class RosInterface(Node):
                 )
                 return
 
+            # camera_camera_parent_transform = (
+            #     np.linalg.inv(optical_axis_to_camera_transform)
+            #     @ camera_optical_lidar_transform
+            #     @ np.linalg.inv(camera_parent_lidar_transform)
+            # )
+
             camera_camera_parent_transform = (
-                np.linalg.inv(optical_axis_to_camera_transform)
-                @ camera_optical_lidar_transform
+                camera_optical_lidar_transform
                 @ np.linalg.inv(camera_parent_lidar_transform)
             )
+
 
             self.output_transform_msg = transform_matrix_to_tf_message(
                 np.linalg.inv(camera_camera_parent_transform)

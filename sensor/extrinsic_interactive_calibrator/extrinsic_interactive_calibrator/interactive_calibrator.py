@@ -48,6 +48,7 @@ from extrinsic_interactive_calibrator.ros_interface import RosInterface
 import numpy as np
 import rclpy
 from rosidl_runtime_py.convert import message_to_ordereddict
+import cv2
 
 
 class InteractiveCalibratorUI(QMainWindow):
@@ -775,18 +776,44 @@ class InteractiveCalibratorUI(QMainWindow):
 
     def sensor_data_ros_callback(self, img, camera_info, pointcloud):
         # This method is executed in the ROS spin thread
+        # with self.lock:
+        #     height, width, channel = img.shape
+        #     bytes_per_line = 3 * width
+        #     q_img = QImage(
+        #         img.data, width, height, bytes_per_line, QImage.Format_RGB888
+        #     ).rgbSwapped()
+        #     self.pixmap_tmp = QPixmap(q_img)
+
+        #     self.pointcloud_tmp = pointcloud
+        #     self.camera_info_tmp = camera_info
+
+        # self.sensor_data_signal.emit()
         with self.lock:
             height, width, channel = img.shape
-            bytes_per_line = 3 * width
-            q_img = QImage(
-                img.data, width, height, bytes_per_line, QImage.Format_RGB888
-            ).rgbSwapped()
+            if channel != 4:
+                raise ValueError("Image channel is not 4 for BGRA32 format")
+
+            camera_matrix = np.array(camera_info.k).reshape(3, 3)
+            dist_coeffs = np.array(camera_info.d)
+
+
+            if camera_matrix is not None and dist_coeffs is not None:
+                img_undistorted = cv2.undistort(img, camera_matrix, dist_coeffs)
+            else:
+                img_undistorted = img
+
+            # 将OpenCV图像转换为QImage
+            bytes_per_line = 4 * width
+            q_img = QImage(img_undistorted.data, width, height, bytes_per_line, QImage.Format_ARGB32)
+
+            # 将QImage转换为QPixmap
             self.pixmap_tmp = QPixmap(q_img)
 
             self.pointcloud_tmp = pointcloud
             self.camera_info_tmp = camera_info
 
         self.sensor_data_signal.emit()
+
 
     def transform_ros_callback(self, transform):
         # This method is executed in the ROS spin thread
